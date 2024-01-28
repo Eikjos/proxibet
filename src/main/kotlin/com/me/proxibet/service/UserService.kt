@@ -2,6 +2,7 @@ package com.me.proxibet.service
 
 import com.me.proxibet.entity.User
 import com.me.proxibet.repository.UserRepository
+import main.kotlin.com.me.proxibet.dto.input.user.CreateUserDto
 import org.springframework.stereotype.Service
 import java.util.UUID
 
@@ -10,8 +11,8 @@ class UserService(
     val userRepository: UserRepository
 ) {
 
-    fun create(user : User) : UUID {
-        val u = userRepository.save(user);
+    fun create(model : CreateUserDto) : UUID {
+
         return u.id;
     }
 }

@@ -12,7 +12,6 @@ group = "com.me"
 version = "0.0.1-SNAPSHOT"
 
 java {
-	sourceCompatibility = JavaVersion.VERSION_17
 }
 
 repositories {
@@ -25,11 +24,16 @@ dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-validation")
 	implementation("jakarta.validation:jakarta.validation-api:3.0.2")
 	implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
+	implementation("org.modelmapper:modelmapper:3.2.0")
 	implementation("org.springframework.boot:spring-boot-starter-security")
+	implementation("io.jsonwebtoken:jjwt-jackson:0.12.3")
+	implementation("io.jsonwebtoken:jjwt:0.12.3")
 	implementation("org.jetbrains.kotlin:kotlin-reflect")
 	developmentOnly("org.springframework.boot:spring-boot-devtools")
 	runtimeOnly("org.postgresql:postgresql")
+	runtimeOnly("io.jsonwebtoken:jjwt-impl:0.12.3")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
+    implementation(kotlin("stdlib-jdk8"))
 }
 
 tasks.withType<KotlinCompile> {
@@ -41,4 +45,7 @@ tasks.withType<KotlinCompile> {
 
 tasks.withType<Test> {
 	useJUnitPlatform()
+}
+kotlin {
+    jvmToolchain(17)
 }

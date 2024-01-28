@@ -1,7 +1,10 @@
 package com.me.proxibet.configuration
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.me.proxibet.filter.JwtAuthenticationFilter
 import com.me.proxibet.service.CustomUserDetailsService
+import com.me.proxibet.service.JWTService
+import jakarta.servlet.http.Cookie
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 import org.springframework.context.annotation.Bean
@@ -24,18 +27,17 @@ import org.springframework.security.web.AuthenticationEntryPoint
 import org.springframework.security.web.SecurityFilterChain
 import org.springframework.security.web.authentication.AuthenticationFailureHandler
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler
-
-
-
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
 
 
 @Configuration
 @EnableWebSecurity
 class SecurityConfig(private val customUserDetailsService: CustomUserDetailsService,
+                     private val jwtService: JWTService,
                      private val objectMapper : ObjectMapper) {
 
     @Bean
-    fun securityChainFilter(http : HttpSecurity) : SecurityFilterChain {
+    fun securityChainFilter(http : HttpSecurity, jwtAuthenticationFilter: JwtAuthenticationFilter) : SecurityFilterChain {
         http.invoke {
             formLogin {
                 loginPage = "/login"
@@ -48,6 +50,7 @@ class SecurityConfig(private val customUserDetailsService: CustomUserDetailsServ
             }
             httpBasic {  }
         }
+        http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter::class.java)
         return http.build();
     }
 
@@ -86,6 +89,10 @@ class SecurityConfig(private val customUserDetailsService: CustomUserDetailsServ
     fun authenticationSuccessHandler(): AuthenticationSuccessHandler? {
         return AuthenticationSuccessHandler { request: HttpServletRequest?, response: HttpServletResponse, authentication: Authentication ->
             response.contentType = MediaType.APPLICATION_JSON_VALUE
+            var cookie = Cookie("jwtToken", jwtService.GenerateToken(authentication));
+            cookie.isHttpOnly = true
+            cookie.path = "/"
+            response.addCookie(cookie)
             response.status = HttpStatus.OK.value()
             objectMapper.writeValue(
                 response.writer, customUserDetailsService.findByUsername(authentication.name)
